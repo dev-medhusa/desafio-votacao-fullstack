@@ -31,6 +31,10 @@ public class PautaController {
 
    @PostMapping   //cria uma nova pauta
     public ResponseEntity<Pauta> create(@RequestBody Pauta pauta) {
+        //se nao tiver duracao fornecida, define 1 min como padrao
+       if (pauta.getDuracao() <= 0) {
+           pauta.setDuracao(1); //duraçao padrao de 1 min
+       }
         return ResponseEntity.status(HttpStatus.CREATED).body(pautaService.save(pauta));
    }
 

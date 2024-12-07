@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PautaServiceImpl implements  PautaService{
+public abstract class PautaServiceImpl implements  PautaService{
 
     @Autowired
     private PautaRepository pautaRepository; //interage com a tabela de pautas no banco de dados
