@@ -2,15 +2,17 @@ package com.db.desafiotecnico_db_votacao.service;
 
 import com.db.desafiotecnico_db_votacao.model.Pauta;
 import com.db.desafiotecnico_db_votacao.repository.PautaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public abstract class PautaServiceImpl implements  PautaService{
+public class PautaServiceImpl implements  PautaService {
 
     @Autowired
     private PautaRepository pautaRepository; //interage com a tabela de pautas no banco de dados
@@ -40,20 +42,35 @@ public abstract class PautaServiceImpl implements  PautaService{
         pautaRepository.deleteById(id); //deleta uma pauta a partir do seu id
     }
 
+
     //atualizando o status da sessao de votaçao
     //verifica o tempo da sessao e altera o status conforme necessario
-
-    private void updateVotingSessionStatus(Pauta pauta) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime sessionEndTime = pauta.getDataCriacao().plusMinutes(pauta.getDuracao());
-        
-        //verifica se a sessao ja foi encerrada
-        if (now.isAfter(sessionEndTime)) {
-            pauta.setStatus("ENCERRADA");
-        } else if (now.isBefore(sessionEndTime) && pauta.getStatus().equals("EM ANDAMENTO")) {
-            pauta.setStatus("EM_ANDAMENTO");
-        } else {
-            pauta.setStatus("AGUARDANDO_INICIO"); //caso a sessao ainda nao tenha começado
+    public void updateVotingSessionStatus() {
+        List<Pauta> pautas = pautaRepository.findAll();
+        for (Pauta pauta : pautas) {
+            if (LocalDateTime.now().isAfter(pauta.getEndTime())) {
+                pauta.setStatus(Pauta.StatusSessao.FECHADA);
+                pautaRepository.save(pauta);
+            }
         }
     }
+
+    public Pauta abrirSessao(Long pautaId) {
+        Pauta pauta = pautaRepository.findById(pautaId)
+                .orElseThrow(() -> new EntityNotFoundException("Pauta não encontrada"));
+
+        if (pauta.getStatus() == Pauta.StatusSessao.ABERTA) {
+            throw new IllegalStateException("Sessão já está aberta para esta pauta. ");
+        }
+
+        pauta.setStatus(Pauta.StatusSessao.ABERTA);
+        pauta.setDataCriacao(LocalDateTime.now());
+        pauta.setEndTime(pauta.getDataCriacao().plusMinutes(pauta.getDuracao()));
+
+        return pautaRepository.save(pauta);
+
+    }
+
+
+
 }

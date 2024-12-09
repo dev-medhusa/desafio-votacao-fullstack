@@ -28,8 +28,21 @@ public class VotoController {
     }
 
     @PostMapping
-    public ResponseEntity<Voto> create(@RequestBody Voto voto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(votoService.save(voto));
+    public ResponseEntity<?> create(@RequestBody Voto voto) {
+        //verifica se a votação está aberta
+        if (!votoService.isVotacaoAberta(voto.getPautaId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A sessão de votação está fechada. ");
+        }
+
+        //verifica se o associado já votou
+        if (votoService.jaVotou(voto.getPautaId(), voto.getAssociadoId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Associado já votou nesta pauta. ");
+        }
+
+        //salva o voto
+        Voto novoVoto = votoService.save(voto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoVoto);
+
     }
 
     @PutMapping

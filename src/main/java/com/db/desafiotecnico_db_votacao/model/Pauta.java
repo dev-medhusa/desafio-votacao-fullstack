@@ -3,6 +3,8 @@ package com.db.desafiotecnico_db_votacao.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 
@@ -27,37 +29,34 @@ public class Pauta {
     @Column(nullable = false)
     private StatusSessao status; //status (aberto, fechado)
 
-    @Column(nullable = false)
-    private int duracao; //duracao da sessao em min
 
     private LocalDateTime endTime; //data e hora do termino da sessao
 
+    @Column(nullable = false)
+    private Integer duracao = 1; // valor padrao em minutos
 
 
-    public Pauta(String titulo, String descricao, int duracao) {
+    public Pauta(String titulo, String descricao, Integer duracao) {
         this.titulo = titulo;
         this.descricao = descricao;
         this.dataCriacao = LocalDateTime.now(); //define data e hora da criação
         this.status = StatusSessao.ABERTA; //status inicial da sessao
-        this.duracao = duracao;
-        this.endTime = dataCriacao.plusMinutes(duracao); //calcula o tempo de termino da sessao
+        this.duracao = duracao != null && duracao > 0 ? duracao : 1; //define padrao se a duracao nao for valida
+        this.endTime = dataCriacao.plusMinutes(this.duracao); //calcula o tempo de termino da sessao
         atualizarStatus(); //chama o metodo para atualizar o status
     }
 
-    public void setStatus(String encerrada) {
-
-    }
 
     public enum StatusSessao {
-        ABERTA, FECHADA, EM_ANDAMENTO
+        ABERTA, FECHADA
     }
 
     //verifica se a sessao precisa ser atualizada
     public void atualizarStatus() {
         if (LocalDateTime.now().isAfter(endTime)) {
             this.status = StatusSessao.FECHADA; //se o tempo do termino foi alcançado
-        } else if (LocalDateTime.now().isBefore(endTime) && status == StatusSessao.ABERTA) {
-            this.status = StatusSessao.EM_ANDAMENTO; // caso contrario
+        } else {
+            this.status = StatusSessao.ABERTA; //caso contrario, aberta
         }
     }
 

@@ -18,5 +18,7 @@ public interface PautaService {
 
     void deletedById(Long id);
 
-    void atualizarStatusDasSessoes();
+    void updateVotingSessionStatus();
+
+    Pauta abrirSessao(Long id);
 }

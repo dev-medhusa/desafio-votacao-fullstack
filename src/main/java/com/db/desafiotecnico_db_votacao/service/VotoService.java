@@ -16,4 +16,8 @@ public interface VotoService {
 
 
     void deleteById(Long id);
+
+     boolean jaVotou(Object pautaId, Object associadoId);
+
+     boolean isVotacaoAberta(Object pautaId);
 }

@@ -57,6 +57,14 @@ public class Voto {
         this.voto = voto;
     }
 
+    public Object getAssociadoId() {
+        return null;
+    }
+
+    public Object getPautaId() {
+        return null;
+    }
+
     public enum VotoOpcao {
         SIM,
         NAO
